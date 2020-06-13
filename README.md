@@ -1,1 +1,1 @@
-# USD_CAD_exchange_rate_predictor_under_COVID-19
+# USD_CAD_exchange_rate_predictor
