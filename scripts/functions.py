@@ -1,22 +1,11 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pylab import rcParams
-import datetime
-import scipy.stats as stats
-from scipy.interpolate import interp1d
 from tqdm import tqdm
-from time import time
 
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.arima_model import ARIMA
-from statsmodels.tsa.stattools import adfuller
-from statsmodels.nonparametric.smoothers_lowess import lowess
-from statsmodels.tsa.seasonal import seasonal_decompose
 import statsmodels.api as sm
-
-import pmdarima
-from pmdarima.arima import ndiffs
 
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
@@ -38,13 +27,30 @@ import tensorflow as tf
 
 from borrowed_functions import lag_df, ts_predict, plot_ts, hms_string
 
-def split_data(data, split_ratio=0.95, num=30):
 
+SEED = 0
+
+def split_data(data, num=30):
+    """
+    Splits data into train, valid, test datasets
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        the data to split
+    num: int (default: 30)
+        the number of observations in valid/test
+        
+    Return:
+    --------
+    four pandas.DataFrame
+        train, valid, test, train_valid datasets
+    """  
     train_valid, test = (
         data.iloc[: - num],
         data.iloc[- num:],
     )
-    splits = int(train_valid.shape[0] * split_ratio)
+
     train, valid = (
         train_valid.iloc[: - num], 
         train_valid.iloc[- num:]
@@ -68,6 +74,25 @@ def split_data(data, split_ratio=0.95, num=30):
 #         return self.n_splits
 
 def plot_forecast(train, obs, fc_series, title, lower_series=None, upper_series=None):
+    """
+    Plots forecast series and saves the plot
+
+    Parameters:
+    -----------
+    train: pandas.DataFrame
+        the training data
+    obs: pandas.DataFrame
+        the observations to predict
+    fc_series: pandas.Series
+        the predicted series
+    title: str
+        the plot title
+    lower_series: pandas.Series (default: None) 
+        the lower 95% confidential bound for predicted series      
+    upper_series: pandas.Series (default: None) 
+        the upper 95% confidential bound for predicted series      
+
+    """  
     # Plot
     plt.figure(figsize=(12, 5), dpi=100)
     plt.plot(train.close, label="training")
@@ -80,7 +105,7 @@ def plot_forecast(train, obs, fc_series, title, lower_series=None, upper_series=
     plt.title(f"{title} Observation vs Prediction")
     plt.legend(loc="upper left", fontsize=8)
     plt.show()
-    plt.savefig(f'../results/{title}.png', bbox_inches='tight')
+    plt.savefig(f'../results/{title.replace(" ", "_")}.png', bbox_inches='tight')
 
 
 ###############################################################################
@@ -88,7 +113,27 @@ def plot_forecast(train, obs, fc_series, title, lower_series=None, upper_series=
 ###############################################################################
 
 def arima_predict(model_fit, num, index, auto=False):
+    """
+    Returns predictions from a ARIMA model
 
+    Parameters:
+    -----------
+    model_fit: ARIMA model
+        the fitted ARIMA model
+    num: int
+        the number of observations to predict
+    index: np.ndarray
+        the index of predicted series
+    auto: bool (default: False) 
+        whether the model is auto trained      
+        
+    Return:
+    --------
+    three pandas.Series
+        prediction series, 
+        the lower 95% confidential bound for predicted series,
+        the upper 95% confidential bound for predicted series
+    """
     if not auto:
         # Forecast with 95% conf
         fc, se, conf = model_fit.forecast(num, alpha=0.05)
@@ -115,6 +160,23 @@ def arima_predict(model_fit, num, index, auto=False):
 
 
 def evaluate_model(pred, obs, index):
+    """
+    Returns evaluation scores of MAPE, RMSE and Min-Max Error
+
+    Parameters:
+    -----------
+    pred: pandas.Series
+        the predicted series
+    obs: pandas.Series
+        the observation series
+    index: str
+        the name of the model 
+        
+    Return:
+    --------
+    pandas.DataFrame
+        evaluation scores
+    """
     scores = {}
 
     # Mean Absolute Percentage Error
@@ -131,7 +193,16 @@ def evaluate_model(pred, obs, index):
 
 
 def plot_trans_train(trans_train, trans):
+    """
+    Plot transformed data
 
+    Parameters:
+    -----------
+    trans_train: pandas.DataFrame
+        the transformed data
+    trans: str
+        the transformation method
+    """
     plt.figure(figsize=(12, 5), dpi=100)
     plt.plot(trans_train.close, label="transformed train")
 
@@ -144,7 +215,27 @@ def plot_trans_train(trans_train, trans):
 ###############################################################################
 
 def cross_validation(key, n_splits, response_col, trans_train, param_grid):
+    """
+    Returns the best model using cross-validation 
 
+    Parameters:
+    -----------
+    key: str
+        the model name
+    n_splits: int
+        the number of data splits
+    response_col: list
+        the name of the response column    
+    trans_train: pandas.DataFrame
+        the transformed data
+    param_grid: dict
+        the hyperparameters and corresponding values to try      
+        
+    Return:
+    --------
+    machine learning model, int
+        the trained best regressor, the number of lag used in the model
+    """
     regressor = {
         "RandomForestRegressor": RandomForestRegressor(random_state=SEED),
         "KNeighborsRegressor": KNeighborsRegressor(),
@@ -197,7 +288,33 @@ def cross_validation(key, n_splits, response_col, trans_train, param_grid):
 def regressor_predict(
     model, train_trans, lag, response_col, index, start, log=True, lamb=None
 ):
+    """
+    Returns predictions from a regressor 
 
+    Parameters:
+    -----------
+    model: machine learning model
+        the regressor for prediction
+    trans_train: pandas.DataFrame
+        the transformed data
+    lag: int
+        the number of lag
+    response_col: list
+        the name of the response column 
+    index: np.ndarray
+        the index of predicted series
+    start: float
+        the first input data for prediction      
+    log: bool (default: True)
+        whether log transformation is used
+    lamb: float (default: None)
+        the lamb used for Box-Cox transformation   
+        
+    Return:
+    --------
+    pandas.Series
+        prediction series
+    """
     df_lag = lag_df(train_trans, lag, response_col).dropna()
 
     # starting data for first prediction
@@ -225,6 +342,41 @@ def analyze_regressor(
     log=True,
     lamb=None,
 ):
+    """
+    Returns the best regressor and evaluation scores
+
+    Parameters:
+    -----------
+    regressor: str
+        the model name
+    title: str
+        the plot title
+    train: pandas.DataFrame
+        the training data
+    test: pandas.DataFrame
+        the testing data
+    n_splits: int
+        the number of data splits
+    response_col: list
+        the name of the response column 
+    trans_train: pandas.DataFrame
+        the transformed data
+    param_grid: dict
+        the hyperparameters and corresponding values to try  
+    index: np.ndarray
+        the index of predicted series
+    start: float
+        the first input data for prediction      
+    log: bool (default: True)
+        whether log transformation is used
+    lamb: float (default: None)
+        the lamb used for Box-Cox transformation   
+        
+    Return:
+    --------
+    machine learning model, pandas.DataFrame
+        the regressor, evaluation scores
+    """
     print(
         f"Performing cross-validation to optimzie the lag and",
         f"hyperparameters for the {regressor} regressor ...",
@@ -247,12 +399,45 @@ def analyze_regressor(
 ###############################################################################
 
 def reshape_data(data):
+    """
+    Reshapes data for training a LSTM model
 
+    Parameters:
+    -----------
+    data: np.ndarray
+        the data to reshape
+        
+    Return:
+    --------
+    np.ndarray, np.ndarray
+        explanatory data, response data
+    """
     X = np.reshape(data[:, 1:], (data.shape[0], 1, data.shape[1] - 1))
     return X, data[:, 0]
 
 
 def train_lstm(train_X, train_y, lag, epochs, verbose=0):
+    """
+    Returns a trained LSTM model
+
+    Parameters:
+    -----------
+    train_X: np.ndarray
+        the explanatory data to train      
+    train_y: np.ndarray
+        the response data to train      
+    lag: int
+        the number of lag
+    epochs: int
+        the number of epochs for training
+    verbose: int (default: 0)
+        the print options of model.fit
+        
+    Return:
+    --------
+    tf.keras.Model
+        the LSTM model
+    """
     # create and fit the LSTM network
     model = Sequential()
 #     model.add(Dense(lag + 1, activation="relu"))
@@ -266,7 +451,31 @@ def train_lstm(train_X, train_y, lag, epochs, verbose=0):
 
 
 def lstm_predict(start, model, scaler, index, lag, n=30, responses=1):
+    """
+    Returns the LSTM model predictions
 
+    Parameters:
+    -----------
+    start: float
+        the first input data for prediction      
+    model: tf.keras.Model
+        the LSTM model
+    scaler: sklearn.preprocessing.MinMaxScaler
+        the scaler used for data transformation
+    index: np.ndarray
+        the index of predicted series
+    lag: int
+        the number of lag
+    n: int (default: 30)
+        the number of predictions
+    responses: int (default: 1)
+        the number of reponses
+        
+    Return:
+    --------
+    pandas.Series
+        prediction series
+    """
     predict = ts_predict(start, model, n=n, responses=responses, lag=lag)
     # invert predictions
     predict = scaler.inverse_transform(predict)
@@ -275,20 +484,57 @@ def lstm_predict(start, model, scaler, index, lag, n=30, responses=1):
     return fc_series
 
 
-def get_inserved_data(data, scaler):
+def get_inversed_data(data, scaler):
+    """
+    Returns inversed data 
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        the data to inverse
+    scaler: sklearn.preprocessing.MinMaxScaler
+        the scaler used for data transformation
+        
+    Return:
+    --------
+    pandas.DataFrame
+        inversed data 
+    """
     inversed = data[["close"]].copy()
     inversed["close"] = scaler.inverse_transform(data)
     return inversed
 
 
 def lstm_results(train, test, lag, response_col, scaler, title):
+    """
+    Returns the LSTM model and evaluation scores
 
+    Parameters:
+    -----------
+    train: pandas.DataFrame
+        the training data
+    test: pandas.DataFrame
+        the testing data
+    lag: int
+        the number of lag
+    response_col: list
+        the name of the response column 
+    scaler: sklearn.preprocessing.MinMaxScaler
+        the scaler used for data transformation
+    title: str
+        the plot title
+        
+    Return:
+    --------
+    tf.keras.Model, pandas.DataFrame
+        the LSTM model, evaluation scores
+    """
     train_X, train_y = reshape_data(train.to_numpy())
     test_X, test_y = reshape_data(test.to_numpy())
     model = train_lstm(train_X, train_y, lag, epochs=30, verbose=2)
 
-    inversed_test = get_inserved_data(test, scaler)
-    inversed_train = get_inserved_data(train, scaler)
+    inversed_test = get_inversed_data(test, scaler)
+    inversed_train = get_inversed_data(train, scaler)
     predict = lstm_predict(
         train_X[-1].flatten(),
         model,
@@ -303,7 +549,24 @@ def lstm_results(train, test, lag, response_col, scaler, title):
     return model, score
 
 
-def lstm_cross_validation(data, response_col, scaler, n=21):
+def lstm_cross_validation(data, response_col, scaler):
+    """
+    Returns cross-validation evalution scores
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        the data for training and validation
+    response_col: list
+        the name of the response column    
+    scaler: sklearn.preprocessing.MinMaxScaler
+        the scaler used for data transformation
+
+    Return:
+    --------
+    pandas.DataFrame
+        the evaluation scores for different lags
+    """
     l = []
     cv_mean = []
     cv_std = []
@@ -314,7 +577,7 @@ def lstm_cross_validation(data, response_col, scaler, n=21):
 #         tscv = Splitter(n_splits=5)
         tscv = TimeSeriesSplit(n_splits=5)
         cv = []
-        for train_index, test_index in tscv.split(train):
+        for train_index, test_index in tscv.split(X):
 
             train_X, train_y = X[train_index, :], y[train_index]
             valid_X, valid_y = X[test_index, :], y[test_index]
