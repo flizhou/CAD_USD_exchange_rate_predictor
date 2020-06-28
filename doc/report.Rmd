@@ -23,9 +23,7 @@ library(tidyverse)
 
 # Summary
 
-In this project, I attempted to use multiple linear regression and general linear models to study the relationship between the portion of the senior (age 65 and up)Here is my research question:
-
-**Does the portion of the senior (age 65 and up) in the population associate with the COVID-19 death rate?**
+In this project, I attempted to predict CAD to USD exchange rates in 30 days given previous exchange rates. 
 
 
 
@@ -39,9 +37,7 @@ The
 
 ## Analysis Methods
 
-The multiple linear regression, GLM (General Linear Model), and bootstrapping algorithms or methods were used to study the relationship between the COVID-19 death rate and the portion of the senior. The Python programming language [@Python], the R programming language [@R] and the following Python/R packages were used: Pandas [@mckinney-proc-scipy-2010], requests [@chandra2015python], knitr [@knitr], tidyverse [@tidyverse], MASS [@mass], mice [@mice], resample [@resample], testthat [@testthat], rjson [@rjson], repr [@repr]. The code used to perform the analysis and create this report can be found here: https://github.com/flizhou/age_effects_on_COVID-19.
-
-The following three functions were used to display model results and analysis.
+ARIMA models, classic supervised learning models, and LSTM methods were used to predict CAD to USD exchange rates in 30 days given previous exchange rates. The Python programming language [@Python], the R programming language [@R] and the following Python/R packages were used: pandas [@mckinney-proc-scipy-2010], Numpy [@oliphant2006guide], Scipy [@mckinney-proc-scipy-2010], Scikit-learn [@pedregosa2011scikit], Matplotlib [@Hunter], Statsmodels [@seabold2010statsmodels], Keras [@chollet2015keras], Tensorflow [@abadi2016tensorflow], pmdarima [@pmdarima], tqdm [@da-Costa-Luis2019], LightGBM [@Ke2017LightGBMAH], requests [@chandra2015python], knitr [@knitr], tidyverse [@tidyverse], rjson [@rjson]. The code used to perform the analysis and create this report can be found here: https://github.com/flizhou/CAD_USD_exchange_rate_predictor.
 
 
 # Results and Discussion
@@ -51,15 +47,10 @@ The following three functions were used to display model results and analysis.
 
 ## Conclusions
 
-In this analysis, I attempted to use a linear model to explain the relationship between the portion of the senior (`age_65up`%) in the population and the COVID-19 death rate. I tried several linear models and finally decided to train a generalized linear model with a Gamma-distribution dependent variable. My final model is:
-
-$\frac{132\text{rate}+2}{133}$ $=\0.0850+\0.0144\text{log(age\_65up)}-\0.0137\text{log(med\_bed)}-\0.0829\text{log(death\_100\_ind+1)}$
-
-where the response (rate) follows a Gamma distribution.
-I understand that this is a simplified model and I may not include all possible confounding variables in the model. And the "LINE" conditions for multiple linear models may not hold for this model. So I used bootstrapping for statistical inference. Given the bootstrapping results, the coefficient of `log(age_65up)` is significant (p-value < 0.05). I have the evidence to reject the null hypothesis and accept the alternative hypothesis. So the portion of the senior (age 65 and up) in the population is positively associated with the COVID-19 death rate.
+In this analysis, I attempted to 
 
 # Limitations
  
-My analysis is based on observational datasets. Some country statistics data used in this analysis are not up-to-date. And the government response index, the stringency index from the [Oxford Covid-19 Government Response Tracker data](https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest.csv), is subjective and may not reflect how effective the government response was. Another big limitation that I could not include all possible confounding variables in this analysis and I may have ignored some important confounding variables. The best way to analyze the relationship between age and the COVID-19 death rate is by conducting well-designed experiments that control confounding variables.
+My analysis is 
 
 # References
