@@ -1,7 +1,7 @@
 ---
 title: "CAD to USD exchange rate prediction"
 author: "Fanli Zhou"
-date: "2020/6/16"
+date: "2020/6/20"
 output: 
   github_document:
     toc: true
@@ -9,48 +9,81 @@ output:
 bibliography: report_refs.bib
 ---
 
-```{r setup, include=FALSE}
+```{r R setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 library(tidyverse)
 ```
 
-```{r define functions and load data, echo=FALSE, message=FALSE}
-
-
-
-```
-
 # Summary
 
-In this project, I attempted to predict CAD to USD exchange rates in 30 days given previous exchange rates. 
-
+In this project, I attempted to predict CAD to USD exchange rates in 30 days given previous exchange rates. This project is mainly for me to practice analyzing time series data and applying machine learning methods on those data. Through this project, I realized how difficult it is to make prediction in practice and feature engineering has great potentials in improving predictions. If time allows, I would like to try more machine learning methods and try more feature engineering methods.
 
 
 # Methods
 
 ## Data
 
-The 
-
-
+The CAD to USD exchange rates data used in this project are obtained using the [Alpha Vantage API](https://www.alphavantage.co/documentation/). The data include daily CAD to USD exchange rates from 2018-01-01 to 2019-12-31.
+Only daily close data are used for this project. Data were imputated with last observation carried over imputation to fill any gaps.
 
 ## Analysis Methods
 
-ARIMA models, classic supervised learning models, and LSTM methods were used to predict CAD to USD exchange rates in 30 days given previous exchange rates. The Python programming language [@Python], the R programming language [@R] and the following Python/R packages were used: pandas [@mckinney-proc-scipy-2010], Numpy [@oliphant2006guide], Scipy [@mckinney-proc-scipy-2010], Scikit-learn [@pedregosa2011scikit], Matplotlib [@Hunter], Statsmodels [@seabold2010statsmodels], Keras [@chollet2015keras], Tensorflow [@abadi2016tensorflow], pmdarima [@pmdarima], tqdm [@da-Costa-Luis2019], LightGBM [@Ke2017LightGBMAH], requests [@chandra2015python], knitr [@knitr], tidyverse [@tidyverse], rjson [@rjson]. The code used to perform the analysis and create this report can be found here: https://github.com/flizhou/CAD_USD_exchange_rate_predictor.
+ARIMA models, classic supervised learning models, and LSTM models were used to predict CAD to USD exchange rates in 30 days given previous exchange rates. The Python programming language [@Python], the R programming language [@R] and the following Python/R packages were used: pandas [@mckinney-proc-scipy-2010], Numpy [@oliphant2006guide], Scipy [@mckinney-proc-scipy-2010], Scikit-learn [@pedregosa2011scikit], Matplotlib [@Hunter], Statsmodels [@seabold2010statsmodels], Keras [@chollet2015keras], Tensorflow [@abadi2016tensorflow], pmdarima [@pmdarima], tqdm [@da-Costa-Luis2019], LightGBM [@Ke2017LightGBMAH], requests [@chandra2015python], knitr [@knitr], tidyverse [@tidyverse], rjson [@rjson]. The code used to perform the analysis and create this report can be found here: https://github.com/flizhou/CAD_USD_exchange_rate_predictor.
 
 
 # Results and Discussion
 
+The detailed analysis is in [`eda.ipynb`](../scripts/eda.ipynb). Cumstomized functions are in [`functions.py`](../scripts/functions.py)
 
+### Data Visualization
+
+The time series is first split into train (670 observations), valid (30 observations) and test (30 observations) datasets.
+
+``` {r}
+
+```
+
+### Feature Engineering and Model Training
+
+To better analyse the time series, I included lagged features, which include data in previous dates, in the analysis. To evaluate models, I calculate the `Mean Absolute Percentage Error` (`MAPE`), the `Root Mean Squared Error` (`RMSE`), and the `Min-Max Error` between predictions and observations.
+
+1. `ARIMA` Forecast
+
+I tried `ARIMA` by hand, `auto-ARIMA` and `auto-SARIMA` to find the best `ARIMA` model. The best model is a `ARIMA(2, 0, 0) x (0, 1, 1, 7)` model.
+
+![](../results/)
+
+Figure 2. `ARIMA(2, 0, 0) x (0, 1, 1, 7)` Forcast.
+
+
+2. Classic Supervised Learning Forecast
+
+The time series is not stationary. A stationary time series should have constant mean and variance. So I removed the trend with differencing to stabilize the mean and used log or Box-Cox transformation to stabilize the variance. I tried `Random Forests`, `k-nearest neighbors` (`KNN`), `Gradient Boosting Regressor`, `Light GBM Regressor` models. Cross-validation was used to optimize `lag` and model hyperparameters. The best model is a `KNN` model with Box-Cox transformation of the data. The model achieved best performace with 12 lag features and the hyperparameter, `n_estimators`, set to 100.
+
+![](../results/)
+
+Figure 3. `KNN` (Box-Cox transformation) Forcast.
+
+3. `LSTM` Recurrent Neural Network Forecast
+
+To train `LSTM` models, data were first transformed with `MinMAxScaler` and ross-validation was used to optimize `lag`. The final `LSTM` uses seven lags.
+
+![](../results/)
+
+Figure 4. `LSTM` Forcast.
+
+### Models Evaluation
+
+Among the three final models, the `ARIMA(2, 0, 0) x (0, 1, 1, 7)` model achieved the best scores.
 
 
 ## Conclusions
 
-In this analysis, I attempted to 
+In this analysis, I attempted to predict CAD to USD exchange rate in 30 dyas and my final best model is an `ARIMA(2, 0, 0) x (0, 1, 1, 7)` model. The model could achieve scores...
 
 # Limitations
- 
-My analysis is 
+
+Models were only tested on the given test dataset and may not give good predictions on new data. Besides, those models may not work well if new external factors begin to affect the exchange rate. In this projectI only tried lag features for feature engineering. There are great potentials in feature engineering. If time allows, I could try other feature engineering options such as rolling windows, time stamps and external features.
 
 # References
