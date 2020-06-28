@@ -549,7 +549,7 @@ def lstm_results(train, test, lag, response_col, scaler, title):
     return model, score
 
 
-def lstm_cross_validation(data, response_col, scaler):
+def lstm_cross_validation(data, response_col, scaler, n=21):
     """
     Returns cross-validation evalution scores
 
@@ -561,7 +561,9 @@ def lstm_cross_validation(data, response_col, scaler):
         the name of the response column    
     scaler: sklearn.preprocessing.MinMaxScaler
         the scaler used for data transformation
-
+    n: int (default: 21)
+        the number of lags to try
+        
     Return:
     --------
     pandas.DataFrame
