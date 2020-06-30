@@ -63,6 +63,8 @@ Cumstomized functions are in [`functions.py`](../scripts/functions.py)
 The time series is first split into train (670 observations), valid (30
 observations) and test (30 observations) datasets.
 
+![](../results/data_visual.png)
+
 ### Feature Engineering and Model Training
 
 To better analyse the time series, I included lagged features, which
@@ -77,7 +79,7 @@ I tried `ARIMA` by hand, `auto-ARIMA` and `auto-SARIMA` to find the best
 `ARIMA` model. The best model is a `ARIMA(2, 0, 0) x (0, 1, 1, 7)`
 model.
 
-![](../results/)
+![](../results/final_arima_2_0_0_x_1_1_1_7.png)
 
 Figure 2. `ARIMA(2, 0, 0) x (0, 1, 1, 7)` Forcast.
 
@@ -89,13 +91,13 @@ stabilize the mean and used log or Box-Cox transformation to stabilize
 the variance. I tried `Random Forests`, `k-nearest neighbors` (`KNN`),
 `Gradient Boosting Regressor`, `Light GBM Regressor` models.
 Cross-validation was used to optimize `lag` and model hyperparameters.
-The best model is a `KNN` model with Box-Cox transformation of the data.
-The model achieved best performace with 12 lag features and the
-hyperparameter, `n_estimators`, set to 100.
+The best model is a `Random Forests` model with Box-Cox transformation
+of the data. The model achieved best performace with 12 lag features and
+the hyperparameter, `n_estimators`, set to 100.
 
-![](../results/)
+![](../results/final_random_forests_box-cox_transformation.png)
 
-Figure 3. `KNN` (Box-Cox transformation) Forcast.
+Figure 3. `Random Forests` (Box-Cox transformation) Forcast.
 
 3.  `LSTM` Recurrent Neural Network Forecast
 
@@ -103,7 +105,7 @@ To train `LSTM` models, data were first transformed with `MinMAxScaler`
 and ross-validation was used to optimize `lag`. The final `LSTM` uses
 seven lags.
 
-![](../results/)
+![](../results/final_lstm.png)
 
 Figure 4. `LSTM` Forcast.
 
@@ -111,6 +113,12 @@ Figure 4. `LSTM` Forcast.
 
 Among the three final models, the `ARIMA(2, 0, 0) x (0, 1, 1, 7)` model
 achieved the best scores.
+
+|                                               |   MAPE |   RMSE | Min.Max.Error |
+| --------------------------------------------- | -----: | -----: | ------------: |
+| ARIMA(2, 0, 0) x (0, 1, 1, 7)                 | 0.0067 | 0.0061 |        0.0067 |
+| Final Random Forests (Box-Cox transformation) | 0.0111 | 0.0097 |        0.0111 |
+| Final LSTM                                    | 0.0170 | 0.0145 |        0.0170 |
 
 ## Conclusions
 
