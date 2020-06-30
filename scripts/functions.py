@@ -94,7 +94,6 @@ def plot_forecast(train, obs, fc_series, title, lower_series=None, upper_series=
 
     """  
     # Plot
-    plt.figure(figsize=(12, 5), dpi=100)
     plt.plot(train.close, label="training")
     plt.plot(obs.close, label="observation")
     plt.plot(fc_series, label="prediction")
@@ -103,9 +102,12 @@ def plot_forecast(train, obs, fc_series, title, lower_series=None, upper_series=
             lower_series.index, lower_series, upper_series, color="k", alpha=0.15
         )
     plt.title(f"{title} Observation vs Prediction")
-    plt.legend(loc="upper left", fontsize=8)
+    plt.xlabel('Exchange Rate')
+    plt.ylabel('Day')
+    plt.legend(loc="upper right", fontsize=16)
+    plt.savefig(f'../results/{title.lower().replace(", ", "_").replace(" (", "_").replace("(", "_").replace(")", "").replace(" ", "_")}.png', 
+    bbox_inches='tight')
     plt.show()
-    plt.savefig(f'../results/{title.replace(" ", "_")}.png', bbox_inches='tight')
 
 
 ###############################################################################
