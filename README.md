@@ -8,9 +8,9 @@ Only daily close data are used for this project. Data were imputated with last o
 ## Data Analysis and Report
 
 The exploratory data analysis and complete data analysis is in the [eda
-notebook](../scripts/eda.ipynb)
+notebook](./scripts/eda.ipynb)
 and the final report can be found
-[here](../doc/report.md)
+[here](./doc/report.md)
 
 ## Dependencies
 
