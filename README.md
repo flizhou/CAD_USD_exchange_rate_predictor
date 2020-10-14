@@ -10,7 +10,7 @@ Only daily close data are used for this project. Data were imputated with last o
 The exploratory data analysis and complete data analysis is in the [eda
 notebook](./scripts/eda.ipynb)
 and the final report can be found
-[here](./doc/report.md)
+[here](https://htmlpreview.github.io/?https://github.com/flizhou/CAD_USD_exchange_rate_predictor/blob/master/doc/report.html)
 
 ## Dependencies
 
