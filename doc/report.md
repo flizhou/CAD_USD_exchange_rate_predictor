@@ -3,20 +3,21 @@ CAD to USD exchange rate prediction
 Fanli Zhou
 2020/6/20
 
-  - [Summary](#summary)
-  - [Methods](#methods)
-      - [Data](#data)
-      - [Analysis Methods](#analysis-methods)
-  - [Results and Discussion](#results-and-discussion)
-      - [Data Visualization](#data-visualization)
-      - [Feature Engineering and Model
+-   [Summary](#summary)
+-   [Methods](#methods)
+    -   [Data](#data)
+    -   [Analysis Methods](#analysis-methods)
+-   [Results and Discussion](#results-and-discussion)
+    -   [Data Visualization](#data-visualization)
+    -   [Feature Engineering and Model
         Training](#feature-engineering-and-model-training)
-      - [Models Evaluation](#models-evaluation)
-      - [Conclusions](#conclusions)
-  - [Limitations](#limitations)
-  - [References](#references)
+    -   [Models Evaluation](#models-evaluation)
+    -   [Conclusions](#conclusions)
+-   [Limitations](#limitations)
+-   [References](#references)
 
-# Summary
+Summary
+=======
 
 In this project, I attempted to predict CAD to USD exchange rates in 30
 days given previous exchange rates. This project is mainly for me to
@@ -26,9 +27,11 @@ is to make prediction in practice and feature engineering has great
 potentials in improving predictions. If time allows, I would like to try
 more machine learning methods and try more feature engineering methods.
 
-# Methods
+Methods
+=======
 
-## Data
+Data
+----
 
 The CAD to USD exchange rates data used in this project are obtained
 using the [Alpha Vantage
@@ -37,7 +40,8 @@ CAD to USD exchange rates from 2018-01-01 to 2019-12-31. Only daily
 close data are used for this project. Data were imputated with last
 observation carried over imputation to fill any gaps.
 
-## Analysis Methods
+Analysis Methods
+----------------
 
 ARIMA models, classic supervised learning models, and LSTM models were
 used to predict CAD to USD exchange rates in 30 days given previous
@@ -51,9 +55,10 @@ Matplotlib (Hunter 2007), Statsmodels (Seabold and Perktold 2010), Keras
 2017), requests (Chandra and Varanasi 2015), knitr (Xie 2014), tidyverse
 (Wickham 2017), rjson (Couture-Beil 2018). The code used to perform the
 analysis and create this report can be found here:
-<https://github.com/flizhou/CAD_USD_exchange_rate_predictor>.
+<a href="https://github.com/flizhou/CAD_USD_exchange_rate_predictor" class="uri">https://github.com/flizhou/CAD_USD_exchange_rate_predictor</a>.
 
-# Results and Discussion
+Results and Discussion
+======================
 
 The detailed analysis is in [`eda.ipynb`](../scripts/eda.ipynb).
 Cumstomized functions are in [`functions.py`](../scripts/functions.py)
@@ -69,9 +74,9 @@ observations) and test (30 observations) datasets.
 
 To better analyse the time series, I included lagged features, which
 include data in previous dates, in the analysis. To evaluate models, I
-calculate the `Mean Absolute Percentage Error` (`MAPE`), the `Root Mean
-Squared Error` (`RMSE`), and the `Min-Max Error` between predictions and
-observations.
+calculate the `Mean Absolute Percentage Error` (`MAPE`), the
+`Root Mean Squared Error` (`RMSE`), and the `Min-Max Error` between
+predictions and observations.
 
 1.  `ARIMA` Forecast
 
@@ -83,7 +88,7 @@ model.
 
 Figure 2. `ARIMA(2, 0, 0) x (0, 1, 1, 7)` Forcast.
 
-2.  Classic Supervised Learning Forecast
+1.  Classic Supervised Learning Forecast
 
 The time series is not stationary. A stationary time series should have
 constant mean and variance. So I removed the trend with differencing to
@@ -99,7 +104,7 @@ the hyperparameter, `n_estimators`, set to 100.
 
 Figure 3. `Random Forests` (Box-Cox transformation) Forcast.
 
-3.  `LSTM` Recurrent Neural Network Forecast
+1.  `LSTM` Recurrent Neural Network Forecast
 
 To train `LSTM` models, data were first transformed with `MinMAxScaler`
 and ross-validation was used to optimize `lag`. The final `LSTM` uses
@@ -115,18 +120,20 @@ Among the three final models, the `ARIMA(2, 0, 0) x (0, 1, 1, 7)` model
 achieved the best scores.
 
 |                                               |   MAPE |   RMSE | Min.Max.Error |
-| --------------------------------------------- | -----: | -----: | ------------: |
+|:----------------------------------------------|-------:|-------:|--------------:|
 | ARIMA(2, 0, 0) x (0, 1, 1, 7)                 | 0.0067 | 0.0061 |        0.0067 |
 | Final Random Forests (Box-Cox transformation) | 0.0111 | 0.0097 |        0.0111 |
 | Final LSTM                                    | 0.0170 | 0.0145 |        0.0170 |
 
-## Conclusions
+Conclusions
+-----------
 
 In this analysis, I attempted to predict CAD to USD exchange rate in 30
-dyas and my final best model is an `ARIMA(2, 0, 0) x (0, 1, 1, 7)`
-model. The model could achieve scores…
+days and my final best model is an `ARIMA(2, 0, 0) x (0, 1, 1, 7)`
+model.
 
-# Limitations
+Limitations
+===========
 
 Models were only tested on the given test dataset and may not give good
 predictions on new data. Besides, those models may not work well if new
@@ -136,20 +143,19 @@ potentials in feature engineering. If time allows, I could try other
 feature engineering options such as rolling windows, time stamps and
 external features.
 
-# References
+References
+==========
 
-<div id="refs" class="references">
+<div id="refs" class="references hanging-indent">
 
 <div id="ref-abadi2016tensorflow">
 
 Abadi, Martı́n, Paul Barham, Jianmin Chen, Zhifeng Chen, Andy Davis,
 Jeffrey Dean, Matthieu Devin, et al. 2016. “Tensorflow: A System for
 Large-Scale Machine Learning.” In *12th
-![\\{](https://latex.codecogs.com/png.latex?%5C%7B
-"\\{")Usenix![\\}](https://latex.codecogs.com/png.latex?%5C%7D "\\}")
+![\\{](https://latex.codecogs.com/png.latex?%5C%7B "\{")Usenix![\\}](https://latex.codecogs.com/png.latex?%5C%7D "\}")
 Symposium on Operating Systems Design and Implementation
-(![\\{](https://latex.codecogs.com/png.latex?%5C%7B
-"\\{")Osdi![\\}](https://latex.codecogs.com/png.latex?%5C%7D "\\}")
+(![\\{](https://latex.codecogs.com/png.latex?%5C%7B "\{")Osdi![\\}](https://latex.codecogs.com/png.latex?%5C%7D "\}")
 16)*, 265–83.
 
 </div>
@@ -218,8 +224,8 @@ USA.
 
 Pedregosa, Fabian, Gaël Varoquaux, Alexandre Gramfort, Vincent Michel,
 Bertrand Thirion, Olivier Grisel, Mathieu Blondel, et al. 2011.
-“Scikit-Learn: Machine Learning in Python.” *Journal of Machine
-Learning Research* 12 (Oct): 2825–30.
+“Scikit-Learn: Machine Learning in Python.” *Journal of Machine Learning
+Research* 12 (Oct): 2825–30.
 
 </div>
 
